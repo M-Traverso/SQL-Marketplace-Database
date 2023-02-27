@@ -169,6 +169,10 @@ insert into products (SKU,category,description_,price,quantity,seller_id) values
 (0004,"Ropa y accesosrios","Camisa manga corta Quiksilver",12453,10,1),
 (0005,"Hogar, muebles y jardin","Mesa comedor 140 + 6 Sillas",36999,100,1),
 (0006,"Electrodomesticos y aires ac.","Aire acondicionado slam split 4472 frigorias 220v",212999,20,1);
+
+insert into products (SKU,category,description_,price,quantity,seller_id) values
+(0007,"Electrodomesticos y aires ac.","Aire acondicionado slam split 100000 frigorias 220v",500000,20,1);
+
 /* PURCHASES */
 insert into gross_purchases (product_id,buyer_id,date_,status_,payment_method) values
 (1,1,"2023-02-05","pago aprobado","tarjeta de credito"),
@@ -211,6 +215,231 @@ insert into returns_ (net_id,inv_ship_id,status_) values
 insert into refunds (purchNet_id,return_id,status_) values
 (2,null,"tu dinero ha sido depositado en tu billetera virtual"),
 (3,1,"estamos esperando que el vendedor reciba el producto para devolver tu dinero");
+
+/* Script de creacion de vistas */
+
+create or replace view seller_center as
+select
+T1. seller_id,
+T1. sellerName,
+T1. product_id,
+T1. description_,
+T1. category,
+T1. purchGross_id,
+T1. purchNet_id,
+T1. gross_id,
+T2. net_id
+from (
+select
+T1. seller_id,
+T1. sellerName,
+T1. product_id,
+T1. description_,
+T1. category,
+T1. purchGross_id,
+T1. purchNet_id,
+T2. gross_id
+from (
+select
+T1. seller_id,
+T1. sellerName,
+T1. product_id,
+T1. description_,
+T1. category,
+T1. purchGross_id,
+T2. purchNet_id
+from (
+select
+T2. seller_id,
+concat(name_,' ',surname) as sellerName,
+T1. product_id,
+T1. description_,
+T1. category,
+T3. purchGross_id
+from products T1
+inner join sellers T2
+on T1.seller_id = T2.seller_id
+left join gross_purchases T3
+on T1.product_id = T3.product_id) T1
+left join net_purchases T2
+on T1.purchGross_id = T2.purchGross_id) T1
+left join gross_sales T2
+on T1.purchNet_id = T2.purchNet_id) T1
+left join net_sales T2
+on T1.gross_id = T2.gross_id;
+
+select * from seller_center;
+
+create or replace view seller_center_01 as
+select
+seller_id,
+sellerName,
+count(product_id) Products,
+count(purchGross_id) Gross_purchases,
+count(purchNet_id) Net_purchases,
+count(gross_id) Gross_sales,
+count(net_id) Net_sales
+from seller_centre
+group by seller_id;
+
+select * from seller_center_01;
+
+create or replace view seller_center_02 as
+select
+product_id,
+description_,
+category,
+seller_id,
+sellerName,
+count(product_id) Products,
+count(purchGross_id) Gross_purchases,
+count(purchNet_id) Net_purchases,
+count(gross_id) Gross_sales,
+count(net_id) Net_sales
+from seller_centre
+group by product_id;
+
+select * from seller_center_02;
+
+create or replace view buyer_center as
+select
+T1. buyer_id,
+buyerName,
+T1. product_id,
+T1. description_,
+T1. purchGross_id,
+T1. status01,
+T1. payment_id,
+T1. status02,
+T1. purchNet_id,
+T1. status03,
+T1. gross_id,
+T1. status04,
+T1. shiping_id,
+T1. est_date,
+T1. net_id,
+T1. status05,
+T1. return_id,
+T1. status06,
+T2. refund_id,
+T2. status_ as status07
+from(
+select
+T1. buyer_id,
+buyerName,
+T1. product_id,
+T1. description_,
+T1. purchGross_id,
+T1. status01,
+T1. payment_id,
+T1. status02,
+T1. purchNet_id,
+T1. status03,
+T1. gross_id,
+T1. status04,
+T1. shiping_id,
+T1. est_date,
+T1. net_id,
+T1. status05,
+T2. return_id,
+T2. status_ as status06
+from(
+select
+T1. buyer_id,
+buyerName,
+T1. product_id,
+T1. description_,
+T1. purchGross_id,
+T1. status01,
+T1. payment_id,
+T1. status02,
+T1. purchNet_id,
+T1. status03,
+T1. gross_id,
+T1. status04,
+T1. shiping_id,
+T1. est_date,
+T2. net_id,
+T2. status_ as status05
+from(
+select
+T1. buyer_id,
+buyerName,
+T1. product_id,
+T1. description_,
+T1. purchGross_id,
+T1. status01,
+T1. payment_id,
+T1. status02,
+T1. purchNet_id,
+T1. status03,
+T1. gross_id,
+T1. status04,
+T1. shiping_id,
+T2. est_date
+from (
+select
+T1. buyer_id,
+buyerName,
+T1. product_id,
+T1. description_,
+T1. purchGross_id,
+T1. status01,
+T1. payment_id,
+T1. status02,
+T1. purchNet_id,
+T1. status03,
+T2. gross_id,
+T2. shiping_id,
+T2. status_ as status04
+from (
+select
+T1. buyer_id,
+buyerName,
+T1. product_id,
+T1. description_,
+T1. purchGross_id,
+T1. status01,
+T1. payment_id,
+T1. status02,
+T2. purchNet_id,
+T2. status_ as status03
+from (
+select
+T2. buyer_id,
+concat(name_,' ',surname) as buyerName,
+T3. product_id,
+T3. description_,
+T1. purchGross_id,
+T1. status_ as status01,
+T4. payment_id,
+T4. status_ as status02
+from gross_purchases T1
+inner join buyers T2
+on T1.buyer_id = T2.buyer_id
+inner join products T3
+on T1.product_id = T3.product_id
+left join payments T4
+on T1.purchGross_id = T4.purchGross_id) T1
+left join net_purchases T2
+on T1.purchGross_id = T2.purchGross_id) T1
+left join gross_sales T2
+on T1.purchNet_id = T2.purchNet_id) T1
+left join logistics T2
+on T1.shiping_id = T2.shiping_id) T1
+left join net_sales T2
+on T1.gross_id = T2.gross_id) T1
+left join returns_ T2
+on T1.net_id = T2.net_id) T1
+left join refunds T2
+on T1.purchNet_id = T2.purchNet_id;
+
+
+select * from buyer_center;
+
+
+
+
 
 
 
