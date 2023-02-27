@@ -3,6 +3,8 @@
 create schema if not exists marketplace;
 use marketplace;
 
+/* Script de creacion de tablas */
+
 /* SELLERS */
 
 create table sellers(
@@ -151,6 +153,8 @@ status_ varchar(100) not null,
 foreign key (purchNet_id) references net_purchases(purchNet_id) on update cascade,
 foreign key (return_id) references returns_(return_id) on update cascade
 );
+
+/* Script de insercion de datos */
 
 /* SELLERS */
 insert into sellers (name_,surname,DNI,email,phone) values
@@ -437,6 +441,108 @@ on T1.purchNet_id = T2.purchNet_id;
 
 select * from buyer_center;
 
+/* Script de funciones */
+
+DELIMITER //
+create function revenue(n numeric(10,2), p numeric(10,2)) returns numeric(10,2)
+deterministic
+begin
+   return n*p;
+end;
+//
+
+DELIMITER //
+create function ratio(g numeric(10,2), n numeric(10,2)) returns numeric(10,2)
+deterministic
+begin
+   declare f numeric(10,2);
+   IF g <> 0
+   THEN
+   set f = n/g;
+   ELSE
+   set f = null;
+   END IF;
+   return f;
+end;
+//
+
+DELIMITER //
+create function foundations(g numeric(10,2), n numeric(10,2)) returns varchar(50)
+deterministic
+begin
+   declare f numeric(10,2);
+   declare mensaje varchar(50);
+   IF g <> 0
+   THEN
+   set f = n/g;
+   ELSE
+   set f = null;
+   END IF;
+   
+   IF f >= 0.8
+   THEN
+   set mensaje = 'Tienes un flujo saludable';
+   ELSEIF f is not null
+   THEN
+   set mensaje = 'Debes mejorar tu flujo de ventas';
+   ELSE
+   set mensaje = 'Aun no tienes ninguna venta';
+   END IF;
+   return mensaje;
+end;
+//
+
+drop function foundations
+
+create or replace view revenue as
+select 
+T1. product_id,
+T1. net_sales,
+T2. price,
+revenue(net_sales,price) as net_revenue,
+revenue(gross_sales,price) as gross_revenue,
+ratio(gross_sales,net_sales) as Health_ratio,
+foundations(gross_sales,net_sales) as Fundamentals
+from seller_center_02 T1
+left join products T2
+on T1.product_id = T2.product_id;
+
+select * from revenue;
+
+DELIMITER //
+create function purchase_status(a varchar(100), b varchar(100), c varchar(100), d varchar(100), e varchar(100), f varchar(100), g varchar(100)) returns varchar(100)
+deterministic
+begin
+declare mensaje varchar(100);
+   IF g is not null
+   THEN 
+   set mensaje = g;
+   ELSEIF f is not null
+   THEN 
+   set mensaje = f;
+   ELSEIF e is not null
+   THEN
+   set mensaje = e;
+      ELSEIF d is not null
+   THEN
+   set mensaje = d;
+      ELSEIF c is not null
+   THEN
+   set mensaje = c;
+      ELSEIF b is not null
+   THEN
+   set mensaje = b;
+     ELSEIF a is not null
+   THEN
+   set mensaje = a;   
+   END IF;
+   return mensaje;
+end;
+//
+
+drop function purchase_status;
+
+select product_id, description_, purchase_status(status01,status02,status03,status04,status05,status06,status07) Purchase_status from buyer_center;
 
 
 
