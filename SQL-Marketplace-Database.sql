@@ -222,6 +222,7 @@ insert into refunds (purchNet_id,return_id,status_) values
 
 /* Script de creacion de vistas */
 
+/* Seller_center es una vista donde los vendedores van a poder consultar informacion sobre el estado de sus ventas, una especie de tabla de echo */
 create or replace view seller_center as
 select
 T1. seller_id,
@@ -247,6 +248,8 @@ on T5.gross_id = T6.gross_id;
 
 select * from seller_center;
 
+/* Seller_center_01 es donde los vendedores van a poder consultar acerca de sus metricas/performance a nivel global en el marketplace */
+
 create or replace view seller_center_01 as
 select
 seller_id,
@@ -260,6 +263,8 @@ from seller_centre
 group by seller_id;
 
 select * from seller_center_01;
+
+/* Seller_center_02 es donde los vendedores van a poder consultar acerca de sus metricas/performance a nivel producto en el marketplace */
 
 create or replace view seller_center_02 as
 select
@@ -277,6 +282,8 @@ from seller_centre
 group by product_id;
 
 select * from seller_center_02;
+
+/* Buyer_center es una tabla que se va a usar para renderizar en el marketplace la informacion necesaria para el comprador sobre el estado de sus pedidos */
 
 create or replace view buyer_center as
 select
@@ -374,7 +381,7 @@ begin
 end;
 //
 
-drop function foundations
+/* Revenue, ratio y foundations son funciones que les van a brindar visibilidad a los vendedores sobre lo que consideramos una performance saludable dentro del marketplace, una herramienta adicional del seller center */
 
 create or replace view revenue as
 select 
@@ -422,7 +429,7 @@ declare mensaje varchar(100);
 end;
 //
 
-drop function purchase_status;
+/* Purchase_status lo que busca hacer es dar visibilidad al comprador acerca del status mas actulizado del estado de su compra, es un complemento de la vista buyer_center */
 
 select product_id, description_, purchase_status(status01,status02,status03,status04,status05,status06,status07) Purchase_status from buyer_center;
 
