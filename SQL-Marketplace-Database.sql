@@ -225,52 +225,25 @@ insert into refunds (purchNet_id,return_id,status_) values
 create or replace view seller_center as
 select
 T1. seller_id,
-T1. sellerName,
-T1. product_id,
-T1. description_,
-T1. category,
-T1. purchGross_id,
-T1. purchNet_id,
-T1. gross_id,
-T2. net_id
-from (
-select
-T1. seller_id,
-T1. sellerName,
-T1. product_id,
-T1. description_,
-T1. category,
-T1. purchGross_id,
-T1. purchNet_id,
-T2. gross_id
-from (
-select
-T1. seller_id,
-T1. sellerName,
-T1. product_id,
-T1. description_,
-T1. category,
-T1. purchGross_id,
-T2. purchNet_id
-from (
-select
-T2. seller_id,
 concat(name_,' ',surname) as sellerName,
-T1. product_id,
-T1. description_,
-T1. category,
-T3. purchGross_id
-from products T1
-inner join sellers T2
+T2. product_id,
+T2. description_,
+T2. category,
+T3. purchGross_id,
+T4. purchNet_id,
+T5. gross_id,
+T6. net_id
+from sellers T1
+inner join products T2
 on T1.seller_id = T2.seller_id
 left join gross_purchases T3
-on T1.product_id = T3.product_id) T1
-left join net_purchases T2
-on T1.purchGross_id = T2.purchGross_id) T1
-left join gross_sales T2
-on T1.purchNet_id = T2.purchNet_id) T1
-left join net_sales T2
-on T1.gross_id = T2.gross_id;
+on T2.product_id = T3.product_id
+left join net_purchases T4
+on T3.purchGross_id = T4.purchGross_id
+left join gross_sales T5
+on T4.purchNet_id = T5.purchNet_id
+left join net_sales T6
+on T5.gross_id = T6.gross_id;
 
 select * from seller_center;
 
@@ -308,135 +281,44 @@ select * from seller_center_02;
 create or replace view buyer_center as
 select
 T1. buyer_id,
-buyerName,
-T1. product_id,
-T1. description_,
-T1. purchGross_id,
-T1. status01,
-T1. payment_id,
-T1. status02,
-T1. purchNet_id,
-T1. status03,
-T1. gross_id,
-T1. status04,
-T1. shiping_id,
-T1. est_date,
-T1. net_id,
-T1. status05,
-T1. return_id,
-T1. status06,
-T2. refund_id,
-T2. status_ as status07
-from(
-select
-T1. buyer_id,
-buyerName,
-T1. product_id,
-T1. description_,
-T1. purchGross_id,
-T1. status01,
-T1. payment_id,
-T1. status02,
-T1. purchNet_id,
-T1. status03,
-T1. gross_id,
-T1. status04,
-T1. shiping_id,
-T1. est_date,
-T1. net_id,
-T1. status05,
-T2. return_id,
-T2. status_ as status06
-from(
-select
-T1. buyer_id,
-buyerName,
-T1. product_id,
-T1. description_,
-T1. purchGross_id,
-T1. status01,
-T1. payment_id,
-T1. status02,
-T1. purchNet_id,
-T1. status03,
-T1. gross_id,
-T1. status04,
-T1. shiping_id,
-T1. est_date,
-T2. net_id,
-T2. status_ as status05
-from(
-select
-T1. buyer_id,
-buyerName,
-T1. product_id,
-T1. description_,
-T1. purchGross_id,
-T1. status01,
-T1. payment_id,
-T1. status02,
-T1. purchNet_id,
-T1. status03,
-T1. gross_id,
-T1. status04,
-T1. shiping_id,
-T2. est_date
-from (
-select
-T1. buyer_id,
-buyerName,
-T1. product_id,
-T1. description_,
-T1. purchGross_id,
-T1. status01,
-T1. payment_id,
-T1. status02,
-T1. purchNet_id,
-T1. status03,
-T2. gross_id,
-T2. shiping_id,
-T2. status_ as status04
-from (
-select
-T1. buyer_id,
-buyerName,
-T1. product_id,
-T1. description_,
-T1. purchGross_id,
-T1. status01,
-T1. payment_id,
-T1. status02,
-T2. purchNet_id,
-T2. status_ as status03
-from (
-select
-T2. buyer_id,
 concat(name_,' ',surname) as buyerName,
 T3. product_id,
 T3. description_,
-T1. purchGross_id,
-T1. status_ as status01,
+T2. purchGross_id,
+T2. status_ as status01,
 T4. payment_id,
-T4. status_ as status02
-from gross_purchases T1
-inner join buyers T2
+T4. status_ as status02,
+T5. purchNet_id,
+T5. status_ as status03,
+T6. gross_id,
+T6. status_ as status04,
+T7. shiping_id,
+T7. est_date,
+T8. net_id,
+T8. status_ as status05,
+T9. return_id,
+T9. status_ as status06,
+T10. refund_id,
+T10. status_ as status07
+from buyers T1
+inner join gross_purchases T2
 on T1.buyer_id = T2.buyer_id
 inner join products T3
-on T1.product_id = T3.product_id
+on T2.product_id = T3.product_id
 left join payments T4
-on T1.purchGross_id = T4.purchGross_id) T1
-left join net_purchases T2
-on T1.purchGross_id = T2.purchGross_id) T1
-left join gross_sales T2
-on T1.purchNet_id = T2.purchNet_id) T1
-left join logistics T2
-on T1.shiping_id = T2.shiping_id) T1
-left join net_sales T2
-on T1.gross_id = T2.gross_id) T1
-left join returns_ T2
-on T1.net_id = T2.net_id) T1
-left join refunds T2
-on T1.purchNet_id = T2.purchNet_id;
+on T2.purchGross_id = T4.purchGross_id
+left join net_purchases T5
+on T2.purchGross_id = T5.purchGross_id
+left join gross_sales T6
+on T5.purchNet_id = T6.purchNet_id
+left join logistics T7
+on T6.shiping_id = T7.shiping_id
+left join net_sales T8
+on T6.gross_id = T8.gross_id
+left join returns_ T9
+on T8.net_id = T9.net_id
+left join refunds T10
+on T5.purchNet_id = T10.purchNet_id;
 
 
 select * from buyer_center;
