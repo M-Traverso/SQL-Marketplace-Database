@@ -1,11 +1,18 @@
 /* -----MARKETPLACE----- */
 
+/* La idea del proyecto es generar una base de datos para un Marketplace del estilo de Mercado Libre o Amazon. Las tablas incluidas almacenan todos los datos 
+necesarios para brindar a los usuarios una experiencia de compra/venta de punta a punta, que puedan contar tanto con servicios de pagos y logística, como tambien 
+servicios de reembolsos y devoluciones. */
+
 create schema if not exists marketplace;
 use marketplace;
 
 /* -----SCRIPT DE CREACION DE TABLAS----- */
 
 /* SELLERS */
+
+/* Sellers: una vez ya registrados, los usuarios que tengan algún producto para vender podrán registrarse como vendedores y se les asignara un seller_id,
+los vendedores contaran con dos id, uno de comprador y otro de vendedor.*/
 
 create table sellers(
 seller_id int primary key not null auto_increment,
@@ -17,6 +24,9 @@ phone varchar(15)
 );
 
 /* BUYERS*/
+
+/* Buyers: esta tabla va a almacenar la información de todos los usuarios que se registren en la aplicación, se les va a requerir cierta información personal 
+para que puedan comenzar a comprar en el Marketplace y se les asignara un buyer_id. */
 
 create table buyers(
 buyer_id int primary key not null auto_increment,
@@ -30,6 +40,8 @@ adress varchar(60) not null
 
 /* 3PL´s */
 
+/* 3PL´s: esta tabla almacenara la información de los partners encargados de realizar la logística, estos contaran con un id_3PL. */
+
 create table _3PL´s(
 id_3PL int primary key not null auto_increment,
 company_name varchar(45),
@@ -38,6 +50,9 @@ PIC_phone varchar(15)
 );
 
 /* PRODUCTS */
+
+/* Productos: la tabla de productos almacenará toda la información que cargue cada uno de los vendedores y cada producto contará con un producto_id único,
+tambien se podrá visualizar la información del vendedor que cargo el producto, categoría, precio y descripción entre otras.*/
 
 create table products(
 product_id int primary key not null auto_increment,
@@ -52,6 +67,8 @@ foreign key (seller_id) references sellers(seller_id) on delete cascade on updat
 
 /* Purchases */
 
+/* Gross purchases: esta tabla almacenara el primer paso de la experiencia de compra, cuando el vendedor decide comprar un producto y ejecuta el pago. */
+
 create table gross_purchases(
 purchGross_id int primary key not null auto_increment,
 product_id int,
@@ -65,6 +82,8 @@ foreign key (buyer_id) references buyers(buyer_id) on update cascade
 
 /* PAYMENTS */
 
+/* Payments: en la tabla de payments se almacenarán todos los pagos y sus respectivos estados, es decir, si el pago fue aprobado por alguna entidad financiera o no. */
+
 create table payments(
 payment_id int primary key not null auto_increment,
 purchGross_id int,
@@ -73,6 +92,8 @@ foreign key (purchGross_id) references gross_purchases(purchGross_id) on update 
 );
 
 /* NET PURCHASES */
+
+/* Net purchases: una vez aprobado el pago, la compra se almacena en la tabla de compras netas, donde finaliza la compra y se empieza a prepara el paquete para ser enviado. */
 
 create table net_purchases(
 purchNet_id int primary key not null auto_increment,
@@ -85,6 +106,9 @@ foreign key (payment_id) references payments(payment_id) on update cascade
 );
 
 /* LOGISTICS */
+
+/* Logistics: en la tabla logistics se almacena la información necesaria para hacer el seguimiento de los paquetes donde vas a poder encontrar estados del tipo, ‘el vendedor está preparando tu paquete’,
+‘el vendedor ya despacho el paquete’, ‘tu paquete está en camino’, ‘el paquete ya fue entregado’, etc. */
 
 create table logistics(
 shiping_id int primary key not null auto_increment,
@@ -99,6 +123,8 @@ foreign key (id_3PL) references _3PL´s(id_3PL) on update cascade
 
 /* GROSS SALES */
 
+/* Gross sales: la tabla de Gross sales almacena la información de todas las ventas, las que fueron entregadas, las que están en camino y las que están demoradas. */
+
 create table gross_sales(
 gross_id int primary key not null auto_increment,
 purchNet_id int,
@@ -110,6 +136,8 @@ foreign key (shiping_id) references logistics(shiping_id) on update cascade
 
 /* NET SALES */
 
+/* Net sales: la experiencia de compra/venta termina una vez que el usuario recibe el paquete, estas ventas se almacenan en la tabla de net sales. */
+
 create table net_sales(
 net_id int primary key not null auto_increment,
 gross_id int,
@@ -120,6 +148,9 @@ foreign key (shiping_id) references logistics(shiping_id) on update cascade
 );
 
 /* INVERSE LOGISTICS */
+
+/* Inverse-log: puede ser el caso donde el comprador no haya quedado conforme con el producto recibido e inicie un proceso de devolución y reembolso, si este es el caso,
+al iniciarse el proceso de devolución a través de la aplicación se genera un inv_ship_id que hace referencia a la logística inversa, es la logística del comprador al punto de venta. */
 
 create table inverse_log(
 inv_ship_id int primary key not null auto_increment,
@@ -134,6 +165,8 @@ foreign key (id_3PL) references _3PL´s(id_3PL) on update cascade
 
 /* RETURNS */
 
+/* Returns: una vez generado el inv_ship_id se genera la devolución con un return_id para poder realizar el seguimiento de esta.*/
+
 create table returns_(
 return_id int primary key not null auto_increment,
 net_id int not null,
@@ -144,6 +177,10 @@ foreign key (inv_ship_id) references inverse_log(inv_ship_id) on update cascade
 );
 
 /* REFUNDS */
+
+/* Refunds:  una vez devuelto el producto al punto de venta, comienzo el proceso de reembolso, en el cual se genera un refund_id para dar visibilidad del estado del proceso.
+Y esta no es la única posibilidad de reembolso, tambien puede ser el caso donde el comprador se arrepiente de la compra antes de haber recibido el paquete y realiza una cancelación
+en este caso se va a generar un refund_id pero el campo donde figura el return_id va a ser nulo. */
 
 create table refunds(
 refund_id int primary key not null auto_increment,
