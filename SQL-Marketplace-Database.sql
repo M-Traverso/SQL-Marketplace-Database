@@ -296,7 +296,7 @@ count(purchGross_id) Gross_purchases,
 count(purchNet_id) Net_purchases,
 count(gross_id) Gross_sales,
 count(net_id) Net_sales
-from seller_centre
+from seller_center
 group by seller_id;
 
 select * from seller_center_01;
@@ -315,7 +315,7 @@ count(purchGross_id) Gross_purchases,
 count(purchNet_id) Net_purchases,
 count(gross_id) Gross_sales,
 count(net_id) Net_sales
-from seller_centre
+from seller_center
 group by product_id;
 
 select * from seller_center_02;
@@ -498,7 +498,7 @@ select * from gross_purchases;
 /* Se procede a revisar el pago de la compra con id=12 */
 
 insert into payments (purchGross_id,status_) values
-(12,"pago con tarjeta de credito visa: APROBADO");
+(7,"pago con tarjeta de credito visa: APROBADO");
 
 select * from payments;
 
@@ -506,7 +506,7 @@ select * from payments;
 con el estado "el vendedor esta preparando tu pedido" */
 
 insert into net_purchases (purchGross_id,payment_id,date_,status_) values
-(12,10,"2023-02-05","el vendedor esta preparando tu pedido");
+(7,6,"2023-02-05","el vendedor esta preparando tu pedido");
 
 select * from net_purchases;
 select * from logistics;
@@ -517,7 +517,7 @@ no se genero el registro en la tabla de logistics*/
 /* Una vez despachado el paquete el vendedor comunicara con un boton a traves del marketplace que el paquete se encuentra en manos del operador logistico,
 esto hara uso del stored procedure pack_off*/
 
-call pack_off(13,"el vendedor ya despacho tu pedido"); /* veamos que pack_off dispara la ejecuccion del trigger logistics_insert_01 */
+call pack_off(6,"el vendedor ya despacho tu pedido"); /* veamos que pack_off dispara la ejecuccion del trigger logistics_insert_01 */
 
 select * from logistics;
 
@@ -542,7 +542,7 @@ call shiping(7,1,325.50);
 
 /* Los triggers van a generar el registro del envio una vez que el vendedor haya despachado el paquete con el operador logistico */
 
-create table logistics(
+/* create table logistics(
 shiping_id int primary key not null auto_increment,
 purchNet_id int,
 id_3PL int,
@@ -551,7 +551,7 @@ est_date date not null,
 status_ varchar(100),
 foreign key (purchNet_id) references net_purchases(purchNet_id) on update cascade,
 foreign key (id_3PL) references _3PL´s(id_3PL) on update cascade
-);
+); */
 
 /* El trigger se activa cuando se inserta o se modifica un registro de la tabla de net_purchases, lo que hace es generar el registro en la tabla de logistics, es decir, cada vez que 
 se aprueba un pago y el vendedor despacha el pedido, se genera un registro en la tabla de envios  */
